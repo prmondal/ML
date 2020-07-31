@@ -7,7 +7,10 @@ backend.set_image_data_format('channels_last')
 BATCH_SIZE = 64
 EPOCHS = 100
 classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
 IS_TRAINED = True
+SAVED_MODEL_NAME = 'final_model_80_perc_acc.h5'
+SAVED_LOG_DIR = 'logs'
 
 def glimpse_dataset(x, labels):
     plt.figure(figsize=(5,5))
@@ -84,7 +87,7 @@ def get_model(input_shape):
 
 def get_callbacks():
     early_stopping = callbacks.EarlyStopping(monitor='val_loss', patience=10)
-    tensorboard_callback = callbacks.TensorBoard(log_dir='logs', profile_batch=0)
+    tensorboard_callback = callbacks.TensorBoard(log_dir=SAVED_LOG_DIR, profile_batch=0)
     return [early_stopping, tensorboard_callback]
 
 def show_training_history(history):
@@ -118,7 +121,7 @@ def run():
     prediction = model.predict(x_test, batch_size=BATCH_SIZE)
     glimpse_prediction(x_test, prediction)
 
-    model.save('final_model.h5')
+    model.save(SAVED_MODEL_NAME)
 
 def load_model_and_predict(model_path):
     (x_train, _), (x_test, _) = datasets.cifar10.load_data()
@@ -141,4 +144,4 @@ if __name__ == '__main__':
     if not IS_TRAINED:
         run()
     else:
-        load_model_and_predict('final_model_80.h5')
+        load_model_and_predict(SAVED_MODEL_NAME)
