@@ -121,12 +121,18 @@ def run():
     model.save('final_model.h5')
 
 def load_model_and_predict(model_path):
-    (_, _), (x_test, _) = datasets.cifar10.load_data()
+    (x_train, _), (x_test, _) = datasets.cifar10.load_data()
+    
+    x_train = x_train.astype('float32')
+    x_test= x_test.astype('float32')
+    x_train = x_train / 255.0
+    x_test = x_test / 255.0
+
     model = models.load_model(model_path)
 
     idx = np.random.randint(0, len(x_test))
     test_image = x_test[idx]
-    test_image = test_image.reshape(1, x_test[idx].shape[0], x_test[idx].shape[1], x_test[idx].shape[2])
+    test_image = test_image.reshape(1, *x_test[idx].shape)
 
     prediction = model.predict(test_image)
     show_prediction(x_test[idx], prediction)
