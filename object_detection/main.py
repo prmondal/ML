@@ -7,8 +7,8 @@ import tensorflow as tf
 import time
 
 # Add paths to make library happy
-sys.path.append(os.path.join(os.getcwd(), 'models'))
-sys.path.append(os.path.join(os.getcwd(), 'models\\research'))
+sys.path.append(os.path.join(os.getcwd(), 'tf-models'))
+sys.path.append(os.path.join(os.getcwd(), 'tf-models\\research'))
 
 from object_detection.utils import label_map_util
 from object_detection.utils import config_util
