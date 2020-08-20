@@ -1,4 +1,4 @@
-1. git clone https://github.com/tensorflow/models.git in this directory.
+1. Clone https://github.com/tensorflow/models.git in this directory under folder **tf-models**.
 2. Install Protobuffer from https://github.com/protocolbuffers/protobuf/releases.
 3. Run the following steps.
     ```
