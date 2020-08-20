@@ -19,6 +19,7 @@ from object_detection.builders import model_builder
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import cv2 as cv
 
 import warnings
 warnings.filterwarnings('ignore')   # Suppress Matplotlib warnings
@@ -57,10 +58,9 @@ def download_model(model_name, model_date):
     return str(model_dir)
 
 MODEL_DATE = '20200711'
-MODEL_NAME = 'centernet_hg104_1024x1024_coco17_tpu-32'
-#'faster_rcnn_resnet152_v1_1024x1024_coco17_tpu-8'
-#'ssd_resnet50_v1_fpn_1024x1024_coco17_tpu-8'
-#'centernet_hg104_1024x1024_coco17_tpu-32'
+MODEL_NAME = 'ssd_mobilenet_v2_320x320_coco17_tpu-8'
+#'ssd_mobilenet_v2_fpnlite_640x640_coco17_tpu-8'
+#'ssd_resnet101_v1_fpn_640x640_coco17_tpu-8'
 
 PATH_TO_MODEL_DIR = download_model(MODEL_NAME, MODEL_DATE)
 
@@ -123,20 +123,14 @@ def load_image_into_numpy_array(path):
     return np.array(Image.open(path))
 
 
-for image_path in IMAGE_PATHS:
+cap = cv.VideoCapture(0)
 
-    print('Running inference for {}... '.format(image_path), end='')
-    start_time = time.time()
+while True:
+    ret, image_np = cap.read()
 
-    image_np = load_image_into_numpy_array(image_path)
-
-    # Things to try:
-    # Flip horizontally
-    # image_np = np.fliplr(image_np).copy()
-
-    # Convert image to grayscale
-    # image_np = np.tile(
-    #     np.mean(image_np, 2, keepdims=True), (1, 1, 3)).astype(np.uint8)
+    if not ret:
+        print("Can't receive frame (stream end?). Exiting ...")
+        break
 
     input_tensor = tf.convert_to_tensor(np.expand_dims(image_np, 0), dtype=tf.float32)
 
@@ -164,13 +158,14 @@ for image_path in IMAGE_PATHS:
             category_index,
             use_normalized_coordinates=True,
             max_boxes_to_draw=200,
-            min_score_thresh=.30,
+            min_score_thresh=.50,
             agnostic_mode=False)
+    
+    # Display output
+    cv.imshow('object detection', cv.resize(image_np_with_detections, (0, 0), fx=0.7, fy=0.7))
 
-    plt.figure()
-    plt.imshow(image_np_with_detections)
+    if cv.waitKey(25) & 0xFF == ord('q'):
+        break
 
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print('Done! Took {} seconds'.format(elapsed_time))
-plt.show()
+cap.release()
+cv.destroyAllWindows()
