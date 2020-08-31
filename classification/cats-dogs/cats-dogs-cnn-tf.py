@@ -125,12 +125,12 @@ def run():
     prediction = model.predict(test_batch, batch_size=BATCH_SIZE)
     glimpse_prediction(test_batch.unbatch(), prediction)
 
-# Accept image size 160 x 160 for simplicity
 def predict_image(image_path):
     image = load_img(image_path)
     image_array = img_to_array(image)
-    image_array = image_array.reshape(1, IMAGE_SIZE, IMAGE_SIZE, 3)
+    image_array = tf.image.resize_with_pad(image_array, IMAGE_SIZE, IMAGE_SIZE)
     image_array = image_array / 255.0
+    image_array = tf.expand_dims(image_array, axis=0)
     
     model = models.load_model(SAVED_MODEL_NAME)
     prediction = model.predict(image_array)
