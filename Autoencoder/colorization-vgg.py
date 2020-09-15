@@ -1,3 +1,4 @@
+# Trained on rose, sunflower and tulip imgages from https://www.kaggle.com/alxmamaev/flowers-recognition
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import backend, models, layers, losses
@@ -20,9 +21,10 @@ np.random.seed(42)
 
 IMAGE_DIR = '../dataset/images/colorization/flowers'
 IMAGE_SIZE = 224 # for VGG
+PRETRAINED_LAST_LAYER_SIZE = (7,7,512)
 BATCH_SIZE = 16
-EPOCHS = 350
-SAVED_MODEL_PATH = 'trained_model_colorization_350_flower_vgg.h5'
+EPOCHS = 10
+SAVED_MODEL_PATH = 'trained_model_colorization_10_flower_vgg16.h5'
 IS_TRAINED = True
 
 # https://github.com/bnsreenu/python_for_microscopists/blob/master/092-autoencoder_colorize_transfer_learning_VGG16_V0.1.py
@@ -42,7 +44,7 @@ for layer in encoder.layers:
 
 #### Decoder ####
 decoder = models.Sequential()
-decoder.add(layers.Conv2D(256, (3,3), activation='relu', padding='same', input_shape=(7,7,512)))
+decoder.add(layers.Conv2D(256, (3,3), activation='relu', padding='same', input_shape=PRETRAINED_LAST_LAYER_SIZE))
 decoder.add(layers.Conv2D(128, (3,3), activation='relu', padding='same'))
 decoder.add(layers.UpSampling2D((2, 2)))
 decoder.add(layers.Conv2D(64, (3,3), activation='relu', padding='same'))
@@ -139,7 +141,7 @@ def run():
         img = img.reshape((1, IMAGE_SIZE, IMAGE_SIZE, 3))
         
         output_pretrained = encoder.predict(img)
-        output_pretrained = output_pretrained.reshape((7,7,512))
+        output_pretrained = output_pretrained.reshape(PRETRAINED_LAST_LAYER_SIZE)
         
         pretrained_features.append(output_pretrained)
 
