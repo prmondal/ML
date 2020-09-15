@@ -13,7 +13,7 @@ backend.set_image_data_format('channels_last')
 IMAGE_SIZE = 28
 BATCH_SIZE = 64
 EPOCHS = 30
-SAVED_MODEL_NAME = 'trained_model.h5'
+SAVED_MODEL_NAME = 'trained_model_reconstruction.h5'
 
 def get_model():
     model = models.Sequential()
