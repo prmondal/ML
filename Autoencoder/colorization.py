@@ -94,7 +94,7 @@ def colorize(image_path):
     output = model.predict(img_color)
     output = output * 128 # from (-1 to 1) to (-127 to 128) 
     
-    result = np.zeros((256, 256, 3))
+    result = np.zeros((IMAGE_SIZE, IMAGE_SIZE, 3))
     result[:,:,0] = img_color[0][:,:,0]
     result[:,:,1:] = output[0]
     result = lab2rgb(result)
