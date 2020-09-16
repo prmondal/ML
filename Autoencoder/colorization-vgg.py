@@ -1,10 +1,14 @@
-# Trained on rose, sunflower and tulip imgages from https://www.kaggle.com/alxmamaev/flowers-recognition
+# Trained on imgages from https://www.kaggle.com/alxmamaev/flowers-recognition - ~ 60% acc
+# Trained on images from https://www.robots.ox.ac.uk/~vgg/data/flowers/102/ ~ 75% acc
+# More images better acc
+import os
+import math
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import backend, models, layers, losses
 from tensorflow.keras.preprocessing.image import load_img, img_to_array, ImageDataGenerator
 import matplotlib.pyplot as plt
-from skimage.color import rgb2lab, lab2rgb, gray2rgb
+from skimage.color import rgb2lab, lab2rgb, gray2rgb, rgb2gray
 from skimage.transform import resize
 from skimage.io import imsave
 
@@ -19,15 +23,15 @@ backend.set_image_data_format('channels_last')
 
 np.random.seed(42)
 
-IMAGE_DIR = '../dataset/images/colorization/flowers'
+IMAGE_DIR = '../dataset/102flowers'
 IMAGE_SIZE = 224 # for VGG
 PRETRAINED_LAST_LAYER_SIZE = (7,7,512)
 BATCH_SIZE = 16
-EPOCHS = 10
-SAVED_MODEL_PATH = 'trained_model_colorization_10_flower_vgg16.h5'
+EPOCHS = 20
+SAVED_MODEL_PATH = 'trained_model_colorization_20_flower_vgg16.h5'
 IS_TRAINED = True
 
-# https://github.com/bnsreenu/python_for_microscopists/blob/master/092-autoencoder_colorize_transfer_learning_VGG16_V0.1.py
+TEST_IMAGES_LOCATION = os.path.join(os.getcwd(), 'test-images')
 
 #### Encoder ####
 model_pretrained = VGG16()
@@ -43,6 +47,7 @@ for layer in encoder.layers:
 #encoder.summary()
 
 #### Decoder ####
+# https://github.com/bnsreenu/python_for_microscopists/blob/master/092-autoencoder_colorize_transfer_learning_VGG16_V0.1.py
 decoder = models.Sequential()
 decoder.add(layers.Conv2D(256, (3,3), activation='relu', padding='same', input_shape=PRETRAINED_LAST_LAYER_SIZE))
 decoder.add(layers.Conv2D(128, (3,3), activation='relu', padding='same'))
@@ -127,7 +132,8 @@ def colorize(image_path):
     result = lab2rgb(result)
     result = tf.image.resize(result, (orig_h, orig_w)) # restore original size
 
-    show_image(result)
+    #show_image(result)
+    return result
 
 def run():
     (x_train, y_train) = load_dataset()
@@ -152,8 +158,39 @@ def run():
 
     decoder.save(SAVED_MODEL_PATH)
 
+# more than 9 images gives memory error
+def test_prediction():
+    test_image_names = os.listdir(TEST_IMAGES_LOCATION)
+
+    test_images_bw_nparray = list(map(lambda name: img_to_array(load_img(os.path.join(TEST_IMAGES_LOCATION, name))), test_image_names))
+    test_images_colored_nparray = list(map(lambda name: colorize(os.path.join(TEST_IMAGES_LOCATION, name)), test_image_names))
+    
+    n = len(test_images_bw_nparray)
+    rows = math.floor(math.sqrt(n))
+    cols = math.ceil(math.sqrt(n))
+
+    plt.subplots(figsize=(10,10))
+    
+    for i in range(n):
+        plt.subplot(rows,cols,i+1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.grid(False)
+        plt.imshow(rgb2gray(test_images_bw_nparray[i]), cmap='gray')
+
+    plt.subplots(figsize=(10,10))
+
+    for i in range(n):
+        plt.subplot(rows,cols,i+1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.grid(False)
+        plt.imshow(test_images_colored_nparray[i])
+
+    plt.show()
+
 if __name__ == '__main__':
     if IS_TRAINED:
-        colorize('test-images/img6.jpg')
+        test_prediction()
     else:
         run()
