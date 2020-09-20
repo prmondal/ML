@@ -31,7 +31,7 @@ EPOCHS = 20
 SAVED_MODEL_PATH = 'trained_model_colorization_20_flower_vgg16.h5'
 IS_TRAINED = True
 
-TEST_IMAGES_LOCATION = os.path.join(os.getcwd(), 'test-images')
+TEST_IMAGES_LOCATION = os.path.join(os.getcwd(), 'test-images/colorization-flower')
 
 #### Encoder ####
 model_pretrained = VGG16()
